@@ -1,0 +1,56 @@
+# share-net — self-hosted (Proxmox) deployment, fronted by Caddy for TLS.
+#   cp .env.example .env      # set SHARE_USER / SHARE_PASS / SESSION_SECRET / DATA_DIR
+#   docker compose up -d --build
+# Then browse https://<host-ip>/  — accept the local-CA warning, or trust Caddy's
+# root CA on your devices (see README). For a real domain, set SITE_ADDRESS + TLS_EMAIL.
+
+services:
+  share-net:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: share-net
+    restart: unless-stopped
+    expose:
+      - "8000" # internal only; Caddy reverse-proxies to this
+    # To reach the app directly over plain HTTP (e.g. debugging), uncomment:
+    # ports:
+    #   - "${PORT:-8000}:8000"
+    environment:
+      PORT: "8000"
+      HOST: "0.0.0.0"
+      SHARE_DIR: /data
+      SHARE_USER: ${SHARE_USER}
+      SHARE_PASS: ${SHARE_PASS}
+      SESSION_SECRET: ${SESSION_SECRET}
+    volumes:
+      # Host folder whose files you want to expose (read + upload).
+      # Must be readable/writable by uid 1000 (the container's non-root user).
+      - "${DATA_DIR:-./data}:/data"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:443}
+      # Blank in .env -> "internal" (Caddy's local CA). An email -> Let's Encrypt.
+      TLS_EMAIL: ${TLS_EMAIL:-internal}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # persists issued certs AND the internal CA — keep this!
+      - caddy_config:/config
+    depends_on:
+      share-net:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

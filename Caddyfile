@@ -1,0 +1,25 @@
+# share-net reverse proxy with automatic TLS.
+#
+# Default (no env set): serves HTTPS on :443 for any hostname/IP using Caddy's
+# internal CA — ideal for LAN access by IP. Browsers warn until you trust
+# Caddy's root CA (see README), but traffic is encrypted either way.
+#
+# Public domain + Let's Encrypt: set SITE_ADDRESS=vault.example.com and
+# TLS_EMAIL=you@example.com in .env (ports 80/443 must be reachable from the
+# internet). Then you can delete the ":80" redirect block below if Caddy warns.
+
+{$SITE_ADDRESS::443} {
+	encode zstd gzip
+
+	# Streams large downloads/uploads through; Caddy imposes no body-size cap.
+	reverse_proxy share-net:8000
+
+	# Empty TLS_EMAIL -> internal CA; an email -> managed Let's Encrypt certs.
+	tls {$TLS_EMAIL:internal}
+}
+
+# Send plain HTTP to HTTPS. (ACME HTTP-01 challenges are still answered here
+# automatically at a higher priority, so Let's Encrypt keeps working.)
+:80 {
+	redir https://{host}{uri} permanent
+}

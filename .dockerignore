@@ -1,0 +1,35 @@
+# Dependencies — reinstalled inside the image from the lockfile
+**/node_modules
+
+# Build outputs — rebuilt inside the image
+**/dist
+**/*.tsbuildinfo
+**/.vite
+
+# Local env / secrets — never bake into images
+**/.env
+**/.env.local
+.env
+.env.local
+
+# Served data — comes from a volume mount, not the image (keeps context small)
+shared
+books
+data
+
+# VCS / tooling / docs
+.git
+.gitignore
+.claude
+.superpowers
+superpowers
+docs
+
+# Docker artifacts
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Misc
+*.log
+.DS_Store

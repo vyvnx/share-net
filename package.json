@@ -1,0 +1,32 @@
+{
+  "name": "share-net",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A modern, minimalist, dark terminal-styled file vault for your LAN, with auth.",
+  "packageManager": "pnpm@10.9.0",
+  "scripts": {
+    "dev": "concurrently -n server,web -c green,cyan \"pnpm dev:server\" \"pnpm dev:web\"",
+    "dev:server": "tsx watch apps/server/src/index.ts",
+    "dev:web": "pnpm --filter @share-net/web dev",
+    "build": "pnpm --filter @share-net/web build",
+    "build:server": "pnpm --filter @share-net/server build",
+    "start": "pnpm run build && NODE_ENV=production tsx apps/server/src/index.ts",
+    "serve": "NODE_ENV=production tsx apps/server/src/index.ts",
+    "test": "pnpm --filter @share-net/server test && pnpm --filter @share-net/web test",
+    "typecheck": "pnpm --filter @share-net/server typecheck && pnpm --filter @share-net/web typecheck",
+    "release": "bash scripts/release.sh",
+    "backup": "bash scripts/backup.sh",
+    "rollback": "bash scripts/rollback.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
