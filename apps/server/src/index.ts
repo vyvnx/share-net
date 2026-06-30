@@ -1,8 +1,11 @@
+import path from "node:path";
 import { buildConfig } from "./config";
 import { createApp } from "./app";
+import { openProgressStore } from "./store/progress";
 
 const cfg = buildConfig();
-const app = createApp(cfg);
+const store = openProgressStore(path.join(cfg.stateDir, "progress.db"));
+const app = createApp(cfg, store);
 
 app.listen(cfg.port, cfg.host, () => {
   console.log(`\n  share-net  →  serving ${cfg.shareDir}`);

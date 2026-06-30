@@ -31,7 +31,7 @@ export function PreviewModal({ entry, path, onClose }: Props) {
             {entry.name}
           </span>
           <span className="modal__tools">
-            <a className="btn-ghost" href={api.downloadUrl(path)}>
+            <a className="btn-ghost" href={api.downloadUrl(path)} download={entry.name}>
               download
             </a>
             <button className="icon-btn" onClick={onClose} aria-label="close preview">

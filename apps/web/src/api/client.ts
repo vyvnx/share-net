@@ -2,11 +2,12 @@ import type {
   FileEntry,
   ListResponse,
   MeResponse,
+  ProgressResponse,
   UploadResponse,
 } from "../../../../packages/types";
 
 // re-export the shared types so components import them from one place.
-export type { FileEntry, ListResponse, MeResponse, UploadResponse };
+export type { FileEntry, ListResponse, MeResponse, ProgressResponse, UploadResponse };
 
 export class ApiError extends Error {
   status: number;
@@ -64,6 +65,19 @@ export const api = {
 
   rawUrl(path: string): string {
     return `/api/raw?${qp(path)}`;
+  },
+
+  async getProgress(path: string): Promise<number | null> {
+    const res = (await (await request(`/api/progress?${qp(path)}`)).json()) as ProgressResponse;
+    return res.page;
+  },
+
+  async setProgress(path: string, page: number): Promise<void> {
+    await request(`/api/progress?${qp(path)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page }),
+    });
   },
 
   async upload(dir: string, file: File): Promise<UploadResponse> {

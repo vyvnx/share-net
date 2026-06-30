@@ -5,8 +5,9 @@ import path from "node:path";
 import type { Config } from "./config";
 import { createAuthRouter, requireAuth } from "./auth";
 import { createFilesRouter } from "./files";
+import type { ProgressStore } from "./store/progress";
 
-export function createApp(cfg: Config) {
+export function createApp(cfg: Config, store: ProgressStore) {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json());
@@ -22,7 +23,7 @@ export function createApp(cfg: Config) {
 
   // public auth endpoints, then everything else behind the session gate.
   app.use("/api", createAuthRouter(cfg));
-  app.use("/api", requireAuth, createFilesRouter(cfg));
+  app.use("/api", requireAuth, createFilesRouter(cfg, store));
 
   // in production, serve the built web app with spa fallback.
   if (fs.existsSync(cfg.webDist)) {

@@ -9,7 +9,16 @@
 # internet). Then you can delete the ":80" redirect block below if Caddy warns.
 
 {$SITE_ADDRESS::443} {
-	encode zstd gzip
+	# only compress text-like responses; never touch pdfs/binaries so downloads
+	# keep an intact Content-Length + range support (pdf.js streaming relies on it).
+	encode zstd gzip {
+		match {
+			header Content-Type text/*
+			header Content-Type application/json*
+			header Content-Type application/javascript*
+			header Content-Type image/svg+xml*
+		}
+	}
 
 	# Streams large downloads/uploads through; Caddy imposes no body-size cap.
 	reverse_proxy share-net:8000

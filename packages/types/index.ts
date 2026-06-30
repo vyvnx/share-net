@@ -28,3 +28,12 @@ export interface UploadResponse {
 export interface ApiError {
   error: string;
 }
+
+export interface ProgressResponse {
+  /** last-read page for a book, or null if none saved. */
+  page: number | null;
+}
+
+export interface ProgressUpdate {
+  page: number;
+}

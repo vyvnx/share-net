@@ -5,7 +5,8 @@ import path from "node:path";
 import multer from "multer";
 import type { Config } from "./config";
 import { safePath, cleanRel } from "./security";
-import type { FileEntry, ListResponse } from "../../../packages/types";
+import type { ProgressStore } from "./store/progress";
+import type { FileEntry, ListResponse, ProgressResponse } from "../../../packages/types";
 
 /** pick a filename that doesn't already exist in `dir`, appending " (n)" before the ext. */
 function nonCollidingName(dir: string, name: string): string {
@@ -20,7 +21,7 @@ function nonCollidingName(dir: string, name: string): string {
   return candidate;
 }
 
-export function createFilesRouter(cfg: Config): Router {
+export function createFilesRouter(cfg: Config, store: ProgressStore): Router {
   const router = Router();
 
   const upload = multer({
@@ -108,7 +109,9 @@ export function createFilesRouter(cfg: Config): Router {
         res.status(404).json({ error: "not found" });
         return;
       }
-      res.download(file, path.basename(file));
+      // no-transform stops any proxy (e.g. caddy) from recompressing and
+      // breaking Content-Length / ranges, which made mobile saves land as 0 kb.
+      res.download(file, path.basename(file), { headers: { "Cache-Control": "no-transform" } });
     });
   });
 
@@ -126,7 +129,7 @@ export function createFilesRouter(cfg: Config): Router {
         res.status(404).json({ error: "not found" });
         return;
       }
-      res.sendFile(file);
+      res.sendFile(file, { headers: { "Cache-Control": "no-transform" } });
     });
   });
 
@@ -144,6 +147,42 @@ export function createFilesRouter(cfg: Config): Router {
       }
       res.json({ name: req.file.filename });
     });
+  });
+
+  // read the last-read page for a book. keyed by the normalized relative path so
+  // it is shared across devices.
+  router.get("/progress", (req, res) => {
+    const raw = String(req.query.path ?? "");
+    let key: string;
+    try {
+      safePath(cfg.shareDir, raw); // validate + contain (rejects traversal)
+      key = cleanRel(raw);
+    } catch {
+      res.status(400).json({ error: "bad path" });
+      return;
+    }
+    const body: ProgressResponse = { page: store.get(key) ?? null };
+    res.json(body);
+  });
+
+  // save the current page for a book.
+  router.put("/progress", (req, res) => {
+    const raw = String(req.query.path ?? "");
+    let key: string;
+    try {
+      safePath(cfg.shareDir, raw);
+      key = cleanRel(raw);
+    } catch {
+      res.status(400).json({ error: "bad path" });
+      return;
+    }
+    const page = Number((req.body as { page?: unknown })?.page);
+    if (!Number.isInteger(page) || page < 1) {
+      res.status(400).json({ error: "bad page" });
+      return;
+    }
+    store.set(key, page);
+    res.json({ ok: true });
   });
 
   return router;

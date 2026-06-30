@@ -76,6 +76,7 @@ export function FileList({
                   <a
                     className="icon-btn"
                     href={downloadUrl(entry.name)}
+                    download={entry.name}
                     aria-label={`download ${entry.name}`}
                     title="download"
                   >

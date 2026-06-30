@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { buildConfig } from "../src/config";
 import { createApp } from "../src/app";
+import { openProgressStore } from "../src/store/progress";
 
 const USER = "tester";
 const PASS = "secret-pass";
@@ -18,14 +19,17 @@ beforeAll(() => {
   fs.writeFileSync(path.join(tmp, "hello.txt"), "hello world");
   fs.writeFileSync(path.join(tmp, "books", "a.txt"), "aaa");
 
+  const store = openProgressStore(path.join(tmp, "state", "progress.db"));
   app = createApp(
     buildConfig({
       shareDir: tmp,
+      stateDir: path.join(tmp, "state"),
       user: USER,
       pass: PASS,
       sessionSecret: "test-secret",
       webDist: path.join(tmp, "__no_web__"),
     }),
+    store,
   );
 });
 
@@ -95,6 +99,48 @@ describe("files", () => {
       .set("Range", "bytes=0-4")
       .expect(206);
     expect(res.text).toBe("hello");
+  });
+
+  it("marks downloads no-transform so proxies don't mangle them", async () => {
+    const agent = await loggedIn();
+    const res = await agent.get("/api/download").query({ path: "hello.txt" }).expect(200);
+    expect(res.headers["cache-control"]).toContain("no-transform");
+  });
+
+  it("serves raw previews no-transform with range support", async () => {
+    const agent = await loggedIn();
+    const res = await agent.get("/api/raw").query({ path: "hello.txt" }).expect(200);
+    expect(res.headers["cache-control"]).toContain("no-transform");
+    expect(res.headers["accept-ranges"]).toBe("bytes");
+  });
+});
+
+describe("progress", () => {
+  it("returns null before anything is saved", async () => {
+    const agent = await loggedIn();
+    const res = await agent.get("/api/progress").query({ path: "books/a.txt" }).expect(200);
+    expect(res.body).toEqual({ page: null });
+  });
+
+  it("saves and returns the page", async () => {
+    const agent = await loggedIn();
+    await agent.put("/api/progress").query({ path: "books/a.txt" }).send({ page: 12 }).expect(200);
+    const res = await agent.get("/api/progress").query({ path: "books/a.txt" }).expect(200);
+    expect(res.body).toEqual({ page: 12 });
+  });
+
+  it("rejects a non-positive page", async () => {
+    const agent = await loggedIn();
+    await agent.put("/api/progress").query({ path: "books/a.txt" }).send({ page: 0 }).expect(400);
+  });
+
+  it("rejects path traversal", async () => {
+    const agent = await loggedIn();
+    await agent.get("/api/progress").query({ path: "../../etc/passwd" }).expect(400);
+  });
+
+  it("requires auth", async () => {
+    await request(app).get("/api/progress").query({ path: "books/a.txt" }).expect(401);
   });
 });
 

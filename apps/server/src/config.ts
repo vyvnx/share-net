@@ -10,6 +10,8 @@ export interface Config {
   sessionSecret: string;
   /** absolute path of the folder to expose. */
   shareDir: string;
+  /** absolute path of the writable folder for app state (the progress db). */
+  stateDir: string;
   /** absolute path of the built web app (served in production). */
   webDist: string;
   isProd: boolean;
@@ -34,6 +36,7 @@ export function buildConfig(overrides: Partial<Config> = {}): Config {
     pass,
     sessionSecret: secret && secret.length > 0 ? secret : crypto.randomBytes(32).toString("hex"),
     shareDir: path.resolve(cwd, process.env.SHARE_DIR ?? "shared"),
+    stateDir: path.resolve(cwd, process.env.STATE_DIR ?? ".state"),
     webDist: path.resolve(cwd, "apps/web/dist"),
     isProd: process.env.NODE_ENV === "production",
     usingDefaultPass: pass === "changeme",
