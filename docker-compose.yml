@@ -20,6 +20,7 @@ services:
       PORT: "8000"
       HOST: "0.0.0.0"
       SHARE_DIR: /data
+      STATE_DIR: /state
       SHARE_USER: ${SHARE_USER}
       SHARE_PASS: ${SHARE_PASS}
       SESSION_SECRET: ${SESSION_SECRET}
@@ -27,6 +28,8 @@ services:
       # Host folder whose files you want to expose (read + upload).
       # Must be readable/writable by uid 1000 (the container's non-root user).
       - "${DATA_DIR:-./data}:/data"
+      # App-owned state (reading-progress db). Keep it so resume survives rebuilds.
+      - "share_state:/state"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8000/api/health"]
       interval: 15s
@@ -52,5 +55,6 @@ services:
         condition: service_healthy
 
 volumes:
+  share_state:
   caddy_data:
   caddy_config:

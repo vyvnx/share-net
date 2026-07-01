@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["node"],
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "paths": {
+      "@share-net/types": ["../../packages/types"]
+    }
   },
   "include": ["src", "tests", "../../packages/types"]
 }

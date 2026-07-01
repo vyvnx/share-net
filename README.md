@@ -73,6 +73,9 @@ BACKUP_DATA=1 pnpm backup  # also pull the vault files (can be large)
 ```
 
 storage: the vault files live in your DATA_DIR host folder, so back them up
-where that folder lives (e.g. zfs snapshots). the only docker-owned state is the
-caddy_data volume (tls ca + certs), which `pnpm backup` captures.
+where that folder lives (e.g. zfs snapshots). docker-owned state is two named
+volumes: caddy_data (tls ca + certs), which `pnpm backup` captures, and
+share_state — a small sqlite db (under STATE_DIR, default /state) holding the
+book reader's last-read page per file. it's the only app-owned mutable state;
+back up the share_state volume to keep resume positions across rebuilds.
 

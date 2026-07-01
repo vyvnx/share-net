@@ -6,7 +6,7 @@ import multer from "multer";
 import type { Config } from "./config";
 import { safePath, cleanRel } from "./security";
 import type { ProgressStore } from "./store/progress";
-import type { FileEntry, ListResponse, ProgressResponse } from "../../../packages/types";
+import type { FileEntry, ListResponse, ProgressResponse } from "@share-net/types";
 
 /** pick a filename that doesn't already exist in `dir`, appending " (n)" before the ext. */
 function nonCollidingName(dir: string, name: string): string {
