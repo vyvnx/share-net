@@ -1,12 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 
 // Allow importing the shared types package that lives outside this app's root.
 const repoRoot = path.resolve(import.meta.dirname, "../..");
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     // scoped alias for the shared types package (matches @share-net/* naming),
     // so apps import it without climbing out with ../../../../.

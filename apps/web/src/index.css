@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* terminal palette + tokens, ported verbatim from theme.css. */
+@theme {
+  --color-bg: #0b0d0c;
+  --color-surface: #111413;
+  --color-surface-2: #161a18;
+  --color-border: #1f2422;
+  --color-border-strong: #2c332f;
+  --color-text: #e6e9e4;
+  --color-muted: #9aa39b;
+  --color-accent: #7ee787;
+  --color-accent-dim: #294a31;
+  --color-error: #ff8a80;
+
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --radius-box: 8px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    line-height: 1.6;
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* desktop nudges the base size down, matching the old media query. */
+  @media (min-width: 768px) {
+    body {
+      font-size: 15px;
+    }
+  }
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  /* repeated atomic widgets. mobile-first 44px targets, 38px on desktop. */
+  .icon-btn {
+    @apply inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-box border border-transparent bg-transparent px-2 text-muted transition-colors md:h-[38px] md:min-w-[38px];
+  }
+  .icon-btn:hover {
+    @apply border-border bg-surface-2 text-accent;
+  }
+  .icon-btn.is-active {
+    @apply border-accent-dim text-accent;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-box border border-border bg-transparent px-3 py-1.5 text-muted transition-colors md:min-h-0;
+  }
+  .btn-ghost:hover {
+    @apply border-accent-dim text-accent;
+  }
+}
+
+/* animations referenced by inline utilities (animate-[blink…], animate-[shake…]). */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
