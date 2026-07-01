@@ -40,4 +40,13 @@ describe("ActionSheet", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it("does not close when the inner panel is clicked", () => {
+    const onClose = vi.fn();
+    render(<ActionSheet title="panel" actions={[{ label: "x" }]} onClose={onClose} />);
+    // the title lives inside the panel, whose onClick stops propagation, so the
+    // click must not bubble up to the backdrop's onClose.
+    fireEvent.click(screen.getByText("panel"));
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });
