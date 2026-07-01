@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fitWidthScale, zoomStep, clampPage, tapZone } from "./reader";
+import { fitWidthScale, zoomStep, clampPage, tapZone, swipeDir } from "./reader";
 
 describe("fitWidthScale", () => {
   it("scales the page width to the viewport", () => {
@@ -44,5 +44,20 @@ describe("tapZone", () => {
   });
   it("the middle does not turn pages", () => {
     expect(tapZone(500, 1000, 0)).toBe("none");
+  });
+});
+
+describe("swipeDir", () => {
+  it("a rightward horizontal drag turns to the previous page", () => {
+    expect(swipeDir(80, 5)).toBe("prev");
+  });
+  it("a leftward horizontal drag turns to the next page", () => {
+    expect(swipeDir(-80, 5)).toBe("next");
+  });
+  it("ignores drags shorter than the threshold", () => {
+    expect(swipeDir(20, 0)).toBe("none");
+  });
+  it("ignores mostly-vertical drags (a scroll, not a swipe)", () => {
+    expect(swipeDir(50, 60)).toBe("none");
   });
 });

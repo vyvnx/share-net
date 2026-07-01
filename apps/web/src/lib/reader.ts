@@ -4,6 +4,9 @@ const MAX_SCALE = 8;
 const TAP_THRESHOLD_PX = 10;
 // left/right edge fraction that turns pages; the middle is reserved for scroll/pan.
 const EDGE = 0.35;
+// a horizontal drag longer than this (and clearly more horizontal than vertical)
+// counts as a page-turn swipe rather than a scroll.
+const SWIPE_THRESHOLD_PX = 45;
 
 /** scale that makes a page's intrinsic (scale-1) width fill the viewport width. */
 export function fitWidthScale(pageWidthAt1: number, viewportWidth: number): number {
@@ -39,4 +42,16 @@ export function tapZone(clickX: number, width: number, movedPx: number): "prev" 
     return "next";
   }
   return "none";
+}
+
+/** classify a pointer drag as a page turn. right (dx>0) = prev, left = next. */
+export function swipeDir(
+  dx: number,
+  dy: number,
+  threshold = SWIPE_THRESHOLD_PX,
+): "prev" | "next" | "none" {
+  if (Math.abs(dx) < threshold || Math.abs(dx) <= Math.abs(dy)) {
+    return "none";
+  }
+  return dx > 0 ? "prev" : "next";
 }
