@@ -475,6 +475,126 @@ a {
   display: none;
 }
 
+/* ── new folder ─────────────────────────────────────────── */
+.newfolder {
+  position: relative;
+  display: inline-flex;
+}
+.newfolder-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+}
+.newfolder-btn:hover {
+  border-color: var(--accent-dim);
+  color: var(--accent);
+}
+.newfolder-btn__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.newfolder-btn__label {
+  display: none;
+  font-size: 13px;
+}
+
+/* a transparent layer that closes the popover on an outside click. */
+.newfolder__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+.newfolder__pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 21;
+  width: min(280px, calc(100vw - 32px));
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+.newfolder__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.newfolder__row:focus-within {
+  border-color: var(--accent-dim);
+}
+.newfolder__prompt {
+  color: var(--accent);
+}
+.newfolder__input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+.newfolder__input::placeholder {
+  color: var(--muted);
+}
+.newfolder__error {
+  margin-top: 8px;
+  color: var(--error);
+  font-size: 12px;
+}
+.newfolder__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.newfolder__btn {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    color 0.12s,
+    border-color 0.12s;
+}
+.newfolder__btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.newfolder__btn--primary {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+.newfolder__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* ── preview modal ──────────────────────────────────────── */
 .modal {
   position: fixed;
@@ -577,6 +697,13 @@ a {
     font-size: 15px;
   }
   .upload-btn__label {
+    display: inline;
+  }
+
+  .newfolder-btn {
+    padding: 0 14px;
+  }
+  .newfolder-btn__label {
     display: inline;
   }
 

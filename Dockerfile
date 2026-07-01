@@ -63,5 +63,5 @@ VOLUME ["/state"]
 USER node
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=5 \
-  CMD wget -qO- http://localhost:8000/api/health || exit 1
+  CMD wget -qO- http://127.0.0.1:8000/api/health || exit 1
 CMD ["node", "dist/index.cjs"]

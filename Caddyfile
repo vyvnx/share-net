@@ -1,12 +1,21 @@
 # share-net reverse proxy with automatic TLS.
 #
-# Default (no env set): serves HTTPS on :443 for any hostname/IP using Caddy's
-# internal CA — ideal for LAN access by IP. Browsers warn until you trust
-# Caddy's root CA (see README), but traffic is encrypted either way.
+# LAN access by IP (typical): set SITE_ADDRESS and DEFAULT_SNI to the host IP in
+# .env (e.g. 192.168.15.39). Caddy's internal CA mints a cert for that IP; the
+# DEFAULT_SNI is required because browsers omit SNI for a bare-IP URL, and
+# without it Caddy has no default cert to present and the handshake fails.
+# Browsers warn until you trust Caddy's root CA (see README); traffic is
+# encrypted either way.
 #
 # Public domain + Let's Encrypt: set SITE_ADDRESS=vault.example.com and
 # TLS_EMAIL=you@example.com in .env (ports 80/443 must be reachable from the
-# internet). Then you can delete the ":80" redirect block below if Caddy warns.
+# internet). DEFAULT_SNI can stay unset — browsers send SNI for hostnames.
+
+{
+	# cert to serve when a client sends no SNI (bare-IP access). harmless for
+	# domain setups. defaults to localhost so the directive always has one arg.
+	default_sni {$DEFAULT_SNI:localhost}
+}
 
 {$SITE_ADDRESS::443} {
 	# only compress text-like responses; never touch pdfs/binaries so downloads

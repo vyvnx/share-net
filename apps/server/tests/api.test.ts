@@ -144,6 +144,47 @@ describe("progress", () => {
   });
 });
 
+describe("mkdir", () => {
+  it("creates a folder in the current directory", async () => {
+    const agent = await loggedIn();
+    const res = await agent.post("/api/mkdir").send({ name: "docs" }).expect(201);
+    expect(res.body).toEqual({ path: "docs" });
+    expect(fs.statSync(path.join(tmp, "docs")).isDirectory()).toBe(true);
+  });
+
+  it("creates nested folders recursively and returns the deepest path", async () => {
+    const agent = await loggedIn();
+    const res = await agent
+      .post("/api/mkdir")
+      .query({ path: "books" })
+      .send({ name: "2026/q3" })
+      .expect(201);
+    expect(res.body).toEqual({ path: "books/2026/q3" });
+    expect(fs.statSync(path.join(tmp, "books", "2026", "q3")).isDirectory()).toBe(true);
+  });
+
+  it("rejects creating a folder that already exists", async () => {
+    const agent = await loggedIn();
+    await agent.post("/api/mkdir").send({ name: "dup" }).expect(201);
+    await agent.post("/api/mkdir").send({ name: "dup" }).expect(409);
+  });
+
+  it("rejects an empty name", async () => {
+    const agent = await loggedIn();
+    await agent.post("/api/mkdir").send({ name: "  " }).expect(400);
+  });
+
+  it("rejects path traversal", async () => {
+    const agent = await loggedIn();
+    await agent.post("/api/mkdir").send({ name: "../escape" }).expect(400);
+    expect(fs.existsSync(path.join(tmp, "..", "escape"))).toBe(false);
+  });
+
+  it("requires auth", async () => {
+    await request(app).post("/api/mkdir").send({ name: "nope" }).expect(401);
+  });
+});
+
 describe("upload", () => {
   it("uploads without overwriting an existing file", async () => {
     const agent = await loggedIn();

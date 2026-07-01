@@ -6,7 +6,7 @@ import multer from "multer";
 import type { Config } from "./config";
 import { safePath, cleanRel } from "./security";
 import type { ProgressStore } from "./store/progress";
-import type { FileEntry, ListResponse, ProgressResponse } from "@share-net/types";
+import type { FileEntry, ListResponse, MkdirResponse, ProgressResponse } from "@share-net/types";
 
 /** pick a filename that doesn't already exist in `dir`, appending " (n)" before the ext. */
 function nonCollidingName(dir: string, name: string): string {
@@ -147,6 +147,52 @@ export function createFilesRouter(cfg: Config, store: ProgressStore): Router {
       }
       res.json({ name: req.file.filename });
     });
+  });
+
+  // create a directory (and any missing parents) under the current directory.
+  // the `name` may be a nested path like "a/b/c". rejects if the leaf already exists.
+  router.post("/mkdir", async (req, res) => {
+    const base = cleanRel(String(req.query.path ?? ""));
+    const name = String((req.body as { name?: unknown })?.name ?? "")
+      .replace(/\\/g, "/")
+      .trim();
+
+    // reject "." / ".." segments outright: safePath only blocks escapes past the
+    // root, but an in-root ".." would silently relocate the folder (join collapses it).
+    if (name.split("/").some((seg) => seg === "." || seg === "..")) {
+      res.status(400).json({ error: "bad path" });
+      return;
+    }
+
+    // combine current dir + requested name, then normalize to a contained relative path.
+    let rel: string;
+    let target: string;
+    try {
+      rel = cleanRel(path.posix.join(base, name));
+      if (rel === "" || rel === base) {
+        res.status(400).json({ error: "empty name" });
+        return;
+      }
+      target = safePath(cfg.shareDir, rel);
+    } catch {
+      res.status(400).json({ error: "bad path" });
+      return;
+    }
+
+    if (fs.existsSync(target)) {
+      res.status(409).json({ error: "already exists" });
+      return;
+    }
+
+    try {
+      await fsp.mkdir(target, { recursive: true });
+    } catch {
+      res.status(400).json({ error: "could not create folder" });
+      return;
+    }
+
+    const body: MkdirResponse = { path: rel };
+    res.status(201).json(body);
   });
 
   // read the last-read page for a book. keyed by the normalized relative path so

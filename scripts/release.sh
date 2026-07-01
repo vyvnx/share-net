@@ -12,7 +12,7 @@
 set -euo pipefail
 
 # --- config (override via env) ----------------------------------------------
-REMOTE="${REMOTE:-luna-server@192.168.15.38}"   # same Proxmox host as luna; override as needed
+REMOTE="${REMOTE:-share-net@192.168.15.39}"   # same Proxmox host as luna; override as needed
 REMOTE_DIR="${REMOTE_DIR:-share-net}"           # path on the server (relative to login home, or absolute)
 KEEP_VERSIONS="${KEEP_VERSIONS:-3}"             # how many :<sha> images to keep on the server for rollback
 ARCHIVE="${ARCHIVE:-/tmp/share-net-image.tar.gz}"

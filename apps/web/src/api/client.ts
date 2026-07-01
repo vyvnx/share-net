@@ -2,12 +2,13 @@ import type {
   FileEntry,
   ListResponse,
   MeResponse,
+  MkdirResponse,
   ProgressResponse,
   UploadResponse,
 } from "../../../../packages/types";
 
 // re-export the shared types so components import them from one place.
-export type { FileEntry, ListResponse, MeResponse, ProgressResponse, UploadResponse };
+export type { FileEntry, ListResponse, MeResponse, MkdirResponse, ProgressResponse, UploadResponse };
 
 export class ApiError extends Error {
   status: number;
@@ -87,6 +88,16 @@ export const api = {
       await request(`/api/upload?${qp(dir)}`, {
         method: "POST",
         body: form,
+      })
+    ).json();
+  },
+
+  async mkdir(dir: string, name: string): Promise<MkdirResponse> {
+    return (
+      await request(`/api/mkdir?${qp(dir)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
       })
     ).json();
   },
