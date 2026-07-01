@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { usePdfDocument } from "../hooks/usePdfDocument";
 import { usePdfOutline } from "../hooks/usePdfOutline";
 import { PdfPage } from "../components/PdfPage";
-import { clampPage, fitWidthScale, tapZone, zoomStep } from "../lib/reader";
+import { clampPage, fitWidthScale, swipeDir, tapZone, zoomStep } from "../lib/reader";
 
 type Mode = "fit-width" | "locked";
 
@@ -138,7 +138,22 @@ export function BookReader() {
     if (!start) {
       return;
     }
-    const movedPx = Math.hypot(e.clientX - start.x, e.clientY - start.y);
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+
+    // a deliberate horizontal swipe turns the page (right = back, left = forward).
+    const swipe = swipeDir(dx, dy);
+    if (swipe === "prev") {
+      go(-1);
+      return;
+    }
+    if (swipe === "next") {
+      go(1);
+      return;
+    }
+
+    // otherwise fall back to an edge tap.
+    const movedPx = Math.hypot(dx, dy);
     const rect = viewportRef.current?.getBoundingClientRect();
     const width = rect?.width ?? viewportWidth;
     const upX = e.clientX - (rect?.left ?? 0);
@@ -210,8 +225,8 @@ export function BookReader() {
   }
 
   return (
-    <div className="reader">
-      <div className="reader__bar">
+    <div className="fixed inset-0 z-[60] flex h-dvh flex-col bg-bg">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border bg-surface px-2.5 pb-2 pt-[max(8px,env(safe-area-inset-top))] [scrollbar-width:none] md:pt-2 [&::-webkit-scrollbar]:hidden">
         <button className="icon-btn" onClick={() => navigate(-1)} aria-label="back" title="back">
           ‹
         </button>
@@ -226,56 +241,73 @@ export function BookReader() {
             ☰
           </button>
         )}
-        <span className="reader__name" title={filename}>
+        <span
+          className="min-w-0 flex-[0_1_auto] overflow-hidden text-ellipsis whitespace-nowrap text-text"
+          title={filename}
+        >
           {filename}
         </span>
-        <span className="reader__spacer" />
-        <button className="reader__counter" onClick={jump} title="go to page">
+        <span className="min-w-2 flex-[1_1_auto]" />
+        <button
+          className="h-11 flex-shrink-0 cursor-pointer whitespace-nowrap rounded-box border border-border bg-transparent px-2.5 text-muted transition-colors hover:border-accent-dim hover:text-accent md:h-[38px]"
+          onClick={jump}
+          title="go to page"
+        >
           {page} / {numPages || "…"}
         </button>
-        <button className="icon-btn" onClick={zoomOut} aria-label="zoom out" title="zoom out">
-          −
-        </button>
-        <button className="icon-btn" onClick={zoomIn} aria-label="zoom in" title="zoom in">
-          +
-        </button>
-        <button className="icon-btn" onClick={fit} aria-label="fit width" title="fit width">
-          ⊏⊐
-        </button>
-        <button
-          className={`icon-btn ${mode === "locked" ? "is-active" : ""}`}
-          onClick={toggleLock}
-          aria-label="lock zoom"
-          aria-pressed={mode === "locked"}
-          title={mode === "locked" ? "unlock zoom" : "lock zoom"}
-        >
-          {mode === "locked" ? "🔒" : "🔓"}
-        </button>
-        <button
-          className="icon-btn"
-          onClick={toggleFullscreen}
-          aria-label="fullscreen"
-          title="fullscreen"
-        >
-          ⤢
-        </button>
-        <a
-          className="icon-btn"
-          href={api.downloadUrl(path)}
-          download={filename}
-          aria-label={`download ${filename}`}
-          title="download"
-        >
-          ⤓
-        </a>
+
+        {/* the tool group: a fixed bottom action bar on mobile, inline on desktop. */}
+        <div className="fixed inset-x-0 bottom-0 z-[61] flex items-center justify-around gap-1 border-t border-border bg-surface px-2 pt-1 pb-[max(4px,env(safe-area-inset-bottom))] md:static md:z-auto md:justify-start md:border-t-0 md:bg-transparent md:p-0">
+          <button className="icon-btn" onClick={zoomOut} aria-label="zoom out" title="zoom out">
+            −
+          </button>
+          <button className="icon-btn" onClick={zoomIn} aria-label="zoom in" title="zoom in">
+            +
+          </button>
+          <button className="icon-btn" onClick={fit} aria-label="fit width" title="fit width">
+            ⊏⊐
+          </button>
+          <button
+            className={`icon-btn ${mode === "locked" ? "is-active" : ""}`}
+            onClick={toggleLock}
+            aria-label="lock zoom"
+            aria-pressed={mode === "locked"}
+            title={mode === "locked" ? "unlock zoom" : "lock zoom"}
+          >
+            {mode === "locked" ? "🔒" : "🔓"}
+          </button>
+          <button
+            className="icon-btn"
+            onClick={toggleFullscreen}
+            aria-label="fullscreen"
+            title="fullscreen"
+          >
+            ⤢
+          </button>
+          <a
+            className="icon-btn"
+            href={api.downloadUrl(path)}
+            download={filename}
+            aria-label={`download ${filename}`}
+            title="download"
+          >
+            ⤓
+          </a>
+        </div>
       </div>
 
-      <div className="reader__body">
+      <div className="relative flex min-h-0 flex-1">
         {showToc && outline.length > 0 && (
           <>
-            <div className="reader__toc-backdrop" onClick={() => setShowToc(false)} />
-            <nav className="reader__toc" aria-label="contents">
-              <div className="reader__toc-head">
+            <div
+              className="absolute inset-0 z-[2] bg-[rgba(5,6,6,0.55)]"
+              onClick={() => setShowToc(false)}
+            />
+            <nav
+              className="absolute bottom-0 left-0 top-0 z-[3] flex w-[min(340px,86vw)] flex-col border-r border-border bg-surface shadow-[0_0_24px_rgba(0,0,0,0.5)]"
+              aria-label="contents"
+            >
+              <div className="flex items-center justify-between border-b border-border py-2 pl-3.5 pr-2 tracking-[0.04em] text-muted">
                 <span>contents</span>
                 <button
                   className="icon-btn"
@@ -285,17 +317,23 @@ export function BookReader() {
                   ×
                 </button>
               </div>
-              <ul className="reader__toc-list">
+              <ul className="m-0 list-none overflow-y-auto p-0 py-1.5">
                 {outline.map((item, i) => (
                   <li key={i}>
                     <button
-                      className={`reader__toc-item ${item.page === page ? "is-current" : ""}`}
+                      className={`flex w-full cursor-pointer items-baseline gap-2.5 border-none bg-transparent px-3 py-2 text-left text-text transition-colors enabled:hover:bg-surface-2 enabled:hover:text-accent disabled:cursor-default disabled:text-muted ${
+                        item.page === page ? "text-accent" : ""
+                      }`}
                       style={{ paddingInlineStart: `${12 + item.depth * 14}px` }}
                       disabled={item.page == null}
                       onClick={() => item.page != null && jumpTo(item.page)}
                     >
-                      <span className="reader__toc-title">{item.title}</span>
-                      {item.page != null && <span className="reader__toc-page">{item.page}</span>}
+                      <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                        {item.title}
+                      </span>
+                      {item.page != null && (
+                        <span className="flex-shrink-0 text-[13px] text-muted">{item.page}</span>
+                      )}
                     </button>
                   </li>
                 ))}
@@ -305,13 +343,13 @@ export function BookReader() {
         )}
 
         <div
-          className="reader__viewport"
+          className="relative flex min-h-0 flex-1 items-start justify-center overflow-auto bg-bg pb-[calc(56px+env(safe-area-inset-bottom))] [touch-action:pan-x_pan-y] md:pb-0"
           ref={viewportRef}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
         >
-          {loading && <div className="reader__status">loading…</div>}
-          {error && <div className="reader__status reader__status--error">{error}</div>}
+          {loading && <div className="m-auto px-4 py-7 text-center text-muted">loading…</div>}
+          {error && <div className="m-auto px-4 py-7 text-center text-error">{error}</div>}
           {doc && !error && (
             <PdfPage
               doc={doc}
@@ -321,8 +359,8 @@ export function BookReader() {
             />
           )}
           {/* visual tap-zone hints; pointer events bubble to the viewport handlers above. */}
-          <div className="reader__zone reader__zone--prev" aria-hidden="true" />
-          <div className="reader__zone reader__zone--next" aria-hidden="true" />
+          <div className="absolute bottom-0 left-0 top-0 z-[1] w-[35%] cursor-w-resize" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 top-0 z-[1] w-[35%] cursor-e-resize" aria-hidden="true" />
         </div>
       </div>
     </div>
