@@ -25,13 +25,24 @@ export function PreviewModal({ entry, path, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="modal__panel" onClick={(e) => e.stopPropagation()}>
-        <div className="modal__bar">
-          <span className="modal__name" title={entry.name}>
+    <div
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-[rgba(5,6,6,0.88)] md:p-8"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-full w-full flex-col bg-surface md:max-h-[900px] md:w-[min(1000px,100%)] md:overflow-hidden md:rounded-box md:border md:border-border"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-border px-3.5 pb-2.5 pt-[max(10px,env(safe-area-inset-top))] md:pt-2.5">
+          <span
+            className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+            title={entry.name}
+          >
             {entry.name}
           </span>
-          <span className="modal__tools">
+          <span className="flex flex-shrink-0 items-center gap-2.5">
             {kind === "pdf" && (
               <Link className="btn-ghost" to={`/read?path=${encodeURIComponent(path)}`}>
                 read
@@ -45,10 +56,14 @@ export function PreviewModal({ entry, path, onClose }: Props) {
             </button>
           </span>
         </div>
-        <div className="modal__body">
-          {kind === "pdf" && <iframe className="modal__pdf" src={src} title={entry.name} />}
-          {kind === "image" && <img className="modal__img" src={src} alt={entry.name} />}
-          {!kind && <div className="filelist__status">no preview available</div>}
+        <div className="flex min-h-0 flex-1 items-center justify-center bg-bg pb-[env(safe-area-inset-bottom)] md:pb-0">
+          {kind === "pdf" && (
+            <iframe className="h-full w-full border-none bg-white" src={src} title={entry.name} />
+          )}
+          {kind === "image" && (
+            <img className="max-h-full max-w-full object-contain" src={src} alt={entry.name} />
+          )}
+          {!kind && <div className="px-4 py-7 text-center text-muted">no preview available</div>}
         </div>
       </div>
     </div>
