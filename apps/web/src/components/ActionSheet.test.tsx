@@ -27,6 +27,15 @@ describe("ActionSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("closes after an href action is tapped", () => {
+    const onClose = vi.fn();
+    render(
+      <ActionSheet title="t" actions={[{ label: "download", href: "#", download: "f" }]} onClose={onClose} />,
+    );
+    fireEvent.click(screen.getByText("download"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("closes when the backdrop is clicked", () => {
     const onClose = vi.fn();
     render(<ActionSheet title="t" actions={[{ label: "x" }]} onClose={onClose} />);

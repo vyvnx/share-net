@@ -317,7 +317,7 @@ export function BookReader() {
                   ×
                 </button>
               </div>
-              <ul className="m-0 list-none overflow-y-auto p-0 py-1.5">
+              <ul className="m-0 list-none overflow-y-auto px-0 pt-1.5 pb-[calc(56px+env(safe-area-inset-bottom))] md:pb-1.5">
                 {outline.map((item, i) => (
                   <li key={i}>
                     <button

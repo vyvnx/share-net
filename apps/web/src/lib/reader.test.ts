@@ -60,4 +60,11 @@ describe("swipeDir", () => {
   it("ignores mostly-vertical drags (a scroll, not a swipe)", () => {
     expect(swipeDir(50, 60)).toBe("none");
   });
+  it("treats an equal horizontal/vertical drag as none (tie goes to none)", () => {
+    expect(swipeDir(50, 50)).toBe("none");
+  });
+  it("turns the page exactly at the threshold and not just below it", () => {
+    expect(swipeDir(45, 0)).toBe("prev");
+    expect(swipeDir(44, 0)).toBe("none");
+  });
 });
