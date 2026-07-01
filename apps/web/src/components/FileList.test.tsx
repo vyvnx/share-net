@@ -67,4 +67,18 @@ describe("FileList", () => {
     const dl = screen.getByRole("link", { name: /download notes\.pdf/i });
     expect(dl.hasAttribute("download")).toBe(true);
   });
+
+  it("opens an action sheet from the overflow button", () => {
+    renderList();
+    fireEvent.click(screen.getByRole("button", { name: /actions for notes\.pdf/i }));
+    expect(screen.getByText("preview")).toBeTruthy();
+    expect(screen.getByText("read")).toBeTruthy();
+    expect(screen.getByText("download")).toBeTruthy();
+  });
+
+  it("opens the sheet when a non-previewable file row is clicked", () => {
+    renderList({ entries: [{ name: "data.bin", type: "file", size: 10, mtime: 0 }] });
+    fireEvent.click(screen.getByText("data.bin"));
+    expect(screen.getByText("download")).toBeTruthy();
+  });
 });
