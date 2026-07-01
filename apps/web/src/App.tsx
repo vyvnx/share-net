@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api/client";
 import { Login } from "./routes/Login";
 import { Browse } from "./routes/Browse";
+import { BookReader } from "./routes/BookReader";
 
 type AuthState =
   | { status: "loading" }
@@ -44,6 +45,10 @@ export function App() {
           element={
             auth.status === "in" ? <Navigate to="/" replace /> : <Login onLogin={refreshMe} />
           }
+        />
+        <Route
+          path="/read"
+          element={auth.status === "in" ? <BookReader /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/*"

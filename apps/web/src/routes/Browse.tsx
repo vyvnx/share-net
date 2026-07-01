@@ -92,6 +92,7 @@ export function Browse({ username, onLogout }: Props) {
             onOpenDir={openDir}
             onPreview={setPreview}
             downloadUrl={(name) => api.downloadUrl(join(path, name))}
+            readUrl={(name) => `/read?path=${encodeURIComponent(join(path, name))}`}
           />
         )}
       </main>

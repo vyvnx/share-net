@@ -3,7 +3,10 @@
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "types": ["vite/client", "node", "vitest/globals"]
+    "types": ["vite/client", "node", "vitest/globals"],
+    "paths": {
+      "@share-net/types": ["../../packages/types"]
+    }
   },
   "include": ["src", "../../packages/types"]
 }

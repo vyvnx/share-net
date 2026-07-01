@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { FileEntry } from "../api/client";
 import { fileExt, humanSize, isPreviewable } from "../lib/format";
 
@@ -8,6 +9,8 @@ interface Props {
   onOpenDir: (name: string) => void;
   onPreview: (entry: FileEntry) => void;
   downloadUrl: (name: string) => string;
+  /** book-reader route for a pdf entry, e.g. /read?path=… */
+  readUrl?: (name: string) => string;
 }
 
 export function FileList({
@@ -17,6 +20,7 @@ export function FileList({
   onOpenDir,
   onPreview,
   downloadUrl,
+  readUrl,
 }: Props) {
   if (loading) {
     return <div className="filelist__status">loading…</div>;
@@ -53,6 +57,16 @@ export function FileList({
               {ext && <span className="row__ext">{ext}</span>}
               <span className="row__size">{isDir ? "—" : humanSize(entry.size)}</span>
               <span className="row__actions">
+                {!isDir && previewKind === "pdf" && readUrl && (
+                  <Link
+                    className="icon-btn"
+                    to={readUrl(entry.name)}
+                    aria-label={`read ${entry.name}`}
+                    title="read"
+                  >
+                    ▤
+                  </Link>
+                )}
                 {!isDir && previewKind && (
                   <button
                     className="icon-btn"

@@ -7,6 +7,13 @@ const repoRoot = path.resolve(import.meta.dirname, "../..");
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    // scoped alias for the shared types package (matches @share-net/* naming),
+    // so apps import it without climbing out with ../../../../.
+    alias: {
+      "@share-net/types": path.resolve(repoRoot, "packages/types"),
+    },
+  },
   server: {
     port: 5173,
     // During dev, proxy API calls to the Express server.

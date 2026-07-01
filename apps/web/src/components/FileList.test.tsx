@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { type ComponentProps } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { FileList } from "./FileList";
 import type { FileEntry } from "../api/client";
 
@@ -13,15 +14,18 @@ const entries: FileEntry[] = [
 
 function renderList(props: Partial<ComponentProps<typeof FileList>> = {}) {
   return render(
-    <FileList
-      entries={entries}
-      loading={false}
-      emptyLabel="empty"
-      onOpenDir={() => {}}
-      onPreview={() => {}}
-      downloadUrl={() => "#"}
-      {...props}
-    />,
+    <MemoryRouter>
+      <FileList
+        entries={entries}
+        loading={false}
+        emptyLabel="empty"
+        onOpenDir={() => {}}
+        onPreview={() => {}}
+        downloadUrl={(name) => `/api/download?path=${encodeURIComponent(name)}`}
+        readUrl={(name) => `/read?path=${encodeURIComponent(name)}`}
+        {...props}
+      />
+    </MemoryRouter>,
   );
 }
 
@@ -50,5 +54,17 @@ describe("FileList", () => {
   it("shows the empty label when there are no entries", () => {
     renderList({ entries: [], emptyLabel: "empty folder" });
     expect(screen.getByText("empty folder")).toBeTruthy();
+  });
+
+  it("offers a read link for pdfs", () => {
+    renderList();
+    const read = screen.getByRole("link", { name: /read notes\.pdf/i });
+    expect(read.getAttribute("href")).toContain("/read?path=notes.pdf");
+  });
+
+  it("download links carry the download attribute", () => {
+    renderList();
+    const dl = screen.getByRole("link", { name: /download notes\.pdf/i });
+    expect(dl.hasAttribute("download")).toBe(true);
   });
 });

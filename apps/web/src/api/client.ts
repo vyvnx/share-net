@@ -4,7 +4,7 @@ import type {
   MeResponse,
   ProgressResponse,
   UploadResponse,
-} from "../../../../packages/types";
+} from "@share-net/types";
 
 // re-export the shared types so components import them from one place.
 export type { FileEntry, ListResponse, MeResponse, ProgressResponse, UploadResponse };

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { api, type FileEntry } from "../api/client";
 import { isPreviewable } from "../lib/format";
 
@@ -31,6 +32,11 @@ export function PreviewModal({ entry, path, onClose }: Props) {
             {entry.name}
           </span>
           <span className="modal__tools">
+            {kind === "pdf" && (
+              <Link className="btn-ghost" to={`/read?path=${encodeURIComponent(path)}`}>
+                read
+              </Link>
+            )}
             <a className="btn-ghost" href={api.downloadUrl(path)} download={entry.name}>
               download
             </a>
