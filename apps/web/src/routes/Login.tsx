@@ -25,18 +25,24 @@ export function Login({ onLogin }: Props) {
   }
 
   return (
-    <div className="login">
-      <form className={`login__card ${error ? "is-error" : ""}`} onSubmit={submit}>
-        <div className="login__title">
-          share-net<span className="cursor">▮</span>
+    <div className="flex min-h-dvh items-center justify-center p-6">
+      <form
+        className={`flex w-full max-w-[380px] flex-col gap-4 rounded-box border bg-surface px-6 py-7 ${
+          error ? "animate-[shake_0.35s] border-error" : "border-border"
+        }`}
+        onSubmit={submit}
+      >
+        <div className="text-xl font-bold tracking-[0.02em]">
+          share-net
+          <span className="ml-px text-accent [animation:blink_1.1s_steps(1)_infinite]">▮</span>
         </div>
-        <div className="login__rule" />
+        <div className="h-px bg-border" />
 
-        <label className="prompt">
-          <span className="prompt__sigil">&gt;</span>
-          <span className="prompt__label">user</span>
+        <label className="flex items-center gap-2 rounded-box border border-border bg-bg px-3 py-2 focus-within:border-accent-dim">
+          <span className="text-accent">&gt;</span>
+          <span className="w-[38px] text-muted">user</span>
           <input
-            className="prompt__input"
+            className="min-w-0 flex-1 border-none bg-transparent text-text outline-none"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoFocus
@@ -46,11 +52,11 @@ export function Login({ onLogin }: Props) {
           />
         </label>
 
-        <label className="prompt">
-          <span className="prompt__sigil">&gt;</span>
-          <span className="prompt__label">pass</span>
+        <label className="flex items-center gap-2 rounded-box border border-border bg-bg px-3 py-2 focus-within:border-accent-dim">
+          <span className="text-accent">&gt;</span>
+          <span className="w-[38px] text-muted">pass</span>
           <input
-            className="prompt__input"
+            className="min-w-0 flex-1 border-none bg-transparent text-text outline-none"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -59,9 +65,13 @@ export function Login({ onLogin }: Props) {
           />
         </label>
 
-        {error && <div className="login__error">access denied</div>}
+        {error && <div className="text-sm text-error">access denied</div>}
 
-        <button className="login__submit" type="submit" disabled={busy}>
+        <button
+          className="min-h-11 rounded-box border border-accent-dim bg-accent-dim p-2.5 text-text transition-[filter] enabled:hover:brightness-125 disabled:cursor-default disabled:opacity-60"
+          type="submit"
+          disabled={busy}
+        >
           {busy ? "authenticating…" : "[ enter ↵ ]"}
         </button>
       </form>
