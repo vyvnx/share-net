@@ -20,6 +20,7 @@ services:
       PORT: "8000"
       HOST: "0.0.0.0"
       SHARE_DIR: /data
+      STATE_DIR: /state
       SHARE_USER: ${SHARE_USER}
       SHARE_PASS: ${SHARE_PASS}
       SESSION_SECRET: ${SESSION_SECRET}
@@ -27,8 +28,12 @@ services:
       # Host folder whose files you want to expose (read + upload).
       # Must be readable/writable by uid 1000 (the container's non-root user).
       - "${DATA_DIR:-./data}:/data"
+      # App-owned state (reading-progress db). Keep it so resume survives rebuilds.
+      - "share_state:/state"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8000/api/health"]
+      # probe 127.0.0.1, not localhost: the server binds IPv4 (0.0.0.0) only, but
+      # localhost can resolve to ::1 first, giving a false "connection refused".
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/api/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -41,6 +46,9 @@ services:
       - "${HTTPS_PORT:-443}:443"
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:443}
+      # cert to serve when a client sends no SNI (bare-IP access). set equal to
+      # SITE_ADDRESS for LAN-by-IP; harmless for domain setups.
+      DEFAULT_SNI: ${DEFAULT_SNI:-localhost}
       # Blank in .env -> "internal" (Caddy's local CA). An email -> Let's Encrypt.
       TLS_EMAIL: ${TLS_EMAIL:-internal}
     volumes:
@@ -52,5 +60,6 @@ services:
         condition: service_healthy
 
 volumes:
+  share_state:
   caddy_data:
   caddy_config:

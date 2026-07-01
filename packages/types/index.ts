@@ -25,6 +25,16 @@ export interface UploadResponse {
   name: string;
 }
 
+export interface MkdirRequest {
+  /** folder name; may be a nested path like "a/b/c" (created recursively). */
+  name: string;
+}
+
+export interface MkdirResponse {
+  /** normalized relative path of the created directory. */
+  path: string;
+}
+
 export interface ApiError {
   error: string;
 }

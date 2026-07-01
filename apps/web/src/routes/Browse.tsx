@@ -6,6 +6,7 @@ import { Breadcrumbs } from "../components/Breadcrumbs";
 import { FileList } from "../components/FileList";
 import { PreviewModal } from "../components/PreviewModal";
 import { UploadButton } from "../components/UploadButton";
+import { NewFolderButton } from "../components/NewFolderButton";
 
 interface Props {
   username: string;
@@ -68,6 +69,13 @@ export function Browse({ username, onLogout }: Props) {
     await load();
   }
 
+  // create the folder(s) and navigate into the deepest created directory.
+  // errors propagate to NewFolderButton, which surfaces them inline.
+  async function handleMkdir(name: string) {
+    const res = await api.mkdir(path, name);
+    navigate(res.path);
+  }
+
   function handleLogout() {
     api.logout().finally(onLogout);
   }
@@ -79,6 +87,7 @@ export function Browse({ username, onLogout }: Props) {
         <div className="mb-3.5 flex min-h-[38px] items-center gap-2.5">
           <Breadcrumbs path={path} onNavigate={navigate} />
           <div className="flex-1" />
+          <NewFolderButton onCreate={handleMkdir} />
           <UploadButton onUpload={handleUpload} />
         </div>
 
