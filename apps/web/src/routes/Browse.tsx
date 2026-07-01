@@ -73,17 +73,17 @@ export function Browse({ username, onLogout }: Props) {
   }
 
   return (
-    <div className="app">
+    <div className="flex min-h-dvh flex-col">
       <TopBar username={username} query={query} onQuery={setQuery} onLogout={handleLogout} />
-      <main className="container">
-        <div className="toolbar">
+      <main className="mx-auto w-full max-w-[880px] flex-1 px-[max(14px,env(safe-area-inset-left))] pb-24 pt-4 md:px-5 md:pb-10 md:pt-[22px]">
+        <div className="mb-3.5 flex min-h-[38px] items-center gap-2.5">
           <Breadcrumbs path={path} onNavigate={navigate} />
-          <div className="toolbar__spacer" />
+          <div className="flex-1" />
           <UploadButton onUpload={handleUpload} />
         </div>
 
         {error ? (
-          <div className="filelist__status filelist__status--error">{error}</div>
+          <div className="px-4 py-7 text-center text-error">{error}</div>
         ) : (
           <FileList
             entries={filtered}

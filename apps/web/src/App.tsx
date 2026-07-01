@@ -31,8 +31,9 @@ export function App() {
 
   if (auth.status === "loading") {
     return (
-      <div className="splash">
-        share-net<span className="cursor">▮</span>
+      <div className="flex h-dvh items-center justify-center tracking-[0.04em] text-muted">
+        share-net
+        <span className="ml-px text-accent [animation:blink_1.1s_steps(1)_infinite]">▮</span>
       </div>
     );
   }
