@@ -53,5 +53,5 @@ export function PdfPage({ doc, page, scale, onIntrinsicWidth }: Props) {
     };
   }, [doc, page, scale, onIntrinsicWidth]);
 
-  return <canvas ref={canvasRef} className="reader__canvas" />;
+  return <canvas ref={canvasRef} className="mx-auto block" />;
 }
